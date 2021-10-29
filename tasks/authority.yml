@@ -1,0 +1,130 @@
+---
+#Tasks for generating the Root Authority certificate
+
+- name: Generate the architecture for certificate storage.
+  block:
+  - ansible.builtin.file:
+      name: "{{ item }}"
+      state: "directory"
+      owner: "{{ admin_linux }}"
+      group: "{{ admin_linux }}"
+      mode: 0700
+    loop:
+      - "{{ path_pki }}"
+      - "{{ path_domain }}"
+      - "{{ path_conf }}"
+      - "{{ path_domain }}/{{ authority }}_ca"
+
+  - ansible.builtin.file:
+      name: "{{ path_domain }}/{{ authority }}_ca/{{ item }}"
+      state: directory
+      owner: "{{ admin_linux }}"
+      group: "{{ admin_linux }}"
+      mode: 0700
+    loop:
+      - public
+      - private
+      - export
+      - request
+      - signed
+      - crl
+      - ".pki"
+
+  - ansible.builtin.copy:
+      src: "{{ item }}"
+      dest: "{{ path_pki }}/{{ domain }}/{{ authority }}_ca/.pki/{{ item }}"
+      state: touch
+      owner: "{{ admin_linux }}"
+      group: "{{ admin_linux }}"
+      mode: 0600
+    loop:
+      - index
+      - index.attr
+      - serial
+
+- name: "Generate openssl config."
+  template:
+    src: "openssl.config.j2"
+    dest: "{{ path_conf }}/openssl.{{ authority }}"
+    owner: "{{ admin_linux }}"
+    group: "{{ admin_linux }}"
+    mode: 0600
+
+#Generate the certificates
+
+- name: Generate the key file.
+  community.crypto.openssl_privatekey:
+    type: "{{ item.type }}"
+    curve: "{{ item.curve | default(omit) }}"
+    size: "{{ item.size | default(omit) }}"
+    path: "{{ path_domain }}/{{ authority }}_ca/private/{{ item.cn }}.key"
+    passphrase: '{{ item.pass | default(omit) }}'
+    mode: 0600
+    owner: '{{ admin_linux }}'
+    group: '{{ admin_linux }}'
+    register: private_key
+    loop: "{{ certificate_[authority] }}"
+
+- name: Generate the csr associate.
+  community.crypto.openssl_csr:
+    common_name: "{{ item.cn }}"
+    country_name: "{{ item.country | default("{{ default.personalize.country }}") }}"
+    state_or_province_name: "{{ item.state | default("{{ default.personalize.state }}") }}"
+    locality_name: "{{ item.locality | default("{{ default.personalize.locality }}") }}"
+    organization_name: "{{ item.o | default("{{ default.personalize.o }}") }}"
+    organizational_unit_name: "{{ item.ou | default("{{ default.personalize.ou }}") }}"
+    email_address: "{{ item.email | default("{{ default.personalize.email }}") }}"
+    basic_constraints: "item[type]['basic_constraints'] | default(omit)"
+    basic_constraints_critical: "item[type]['basic_constraints_critical'] | default(omit)"
+    key_usage: "item[type]['KU'] | default(omit)"
+    key_usage_critical: "item[type]['ku_critical'] | default(omit)"
+    extended_key_usage: "item[type]['EKU'] | default(omit)"
+    extended_key_usage_critical: "item[type]['eku_critical'] | default(omit)"
+    subject_alt_name: "{{ item.san | default(omit) }}"
+    crl_distribution_points: "{{ crl_delegated }}"
+    path: "{{ path_domain }}/{{ authority }}_ca/request/{{ item.cn }}.csr"
+    private_key_path: "{{ private_key.filename }}"
+    mode: 0600
+    owner: '{{ admin_linux }}'
+    group: '{{ admin_linux }}'
+    return_content: yes
+  register: signing_request
+  loop: "{{ certificate_[authority] }}"
+
+- name: Sign certificate.
+  community.crypto.x509_certificate:
+    csr_content: "{{ signing_request.csr }}"
+    path: {{ path_domain }}/{{ authority }}_ca/public/{{certs_name[authority] }}.pem | default(omit)"
+    provider: "{{ provider | default('selfsigned') }}"
+    privatekey_path: "{{ private_key.filename | default(omit) }}"
+    privatekey_passphrase: "{{ root_ca_login.password | default(omit) }}"
+    selfsigned_digest: "{{ ca.digest | default(omit) }}"
+    selfsigned_not_before: "{{ ca.before | default(omit) }}"
+    selfsigned_not_after: "{{ ca.after | default(omit) }}"
+    ownca_path: "{{ path_domain }}/{{ authority }}_ca/public/{{certs_name[authority] }}.pem | default(omit)"
+    ownca_privatekey_path: "{{ path_domain }}/{{ authority }}_ca/private/{{certs_name[authority] }}.key | default(omit)"
+    ownca_privatekey_passphrase:  "{{ ca.pass | default(omit) }}"
+    ownca_digest: "{{ ca.digest | default(omit) }}"
+    ownca_not_before: "{{ ca.before | default(omit) }}"
+    ownca_not_after: "{{ ca.after | default(omit) }}"
+    mode: 0600
+    owner: '{{ admin_linux }}'
+    group: '{{ admin_linux }}'
+    return_content: yes
+  register: certificate
+  loop: "{{ certificate_[authority] }}"
+
+- name: export certificate
+  ansible.builtin.copy:
+    path: "{{ path_domain }}/{{ authority }}_ca/public/{{certs_name[authority] }}.pem"
+    content: "{{ certificate.certificate }}"
+
+- name: Get the serial.
+  community.crypto.x509_certificate_info:
+    content: "{{ certificate.certificate }}"
+  register: certificate_info
+
+- name: Generate the serial of the PKI.
+  ansible.builtin.copy:
+    content: "{{ certificate_info.serial_number +1 }}"
+    path: "{{ path_pki }}/{{ domain }}/{{ authority }}_ca/.pki/{{ item }}/serial"

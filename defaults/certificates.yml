@@ -1,0 +1,57 @@
+---
+#This variable file specifie the defaults parameters for the root certificate, the delegated and an example.
+
+root_ca_login:
+  username: '{{ vault_root_ca_login.username }}'
+  password: '{{ vault_root_ca_login.password }}'
+
+delegated_ca_login:
+  username: '{{ vault_delegated_ca_login.username }}'
+  password: '{{ vault_delegated_ca_login.password }}'
+
+certificate_login:
+  username: '{{ vault_certificate_login.username }}'
+  password: '{{ vault_certificate_login.password }}'
+
+certificate_root:
+  - cn: '{{ certs_name.root }}'
+    type: 'ecc'
+    curve: 'secp521r1'
+    pass: '{{ root_ca_login.passwd }}'
+    country: 'FR'
+    state: 'FRANCE'
+    locality: 'Nice'
+    o: EXAMPLE
+    ou: EXAMPLE CA UNIT
+    email: "adminca@{{ domain }}"
+    type: 'root_ca'
+    provider: selfsigned
+
+certificate_delegated:
+  - cn: '{{ certs_name.delegated }}'
+    type: 'ecc'
+    curve: 'secp521r1'
+    pass: '{{ vault_delegated_ca.passwd }}'
+    country: 'FR'
+    state: 'FRANCE'
+    locality: 'Nice'
+    o: EXAMPLE
+    ou: EXAMPLE CA UNIT
+    email: "adminca@{{ domain }}"
+    type: 'delegated_ca'
+    provider: ownca
+
+certificate_list:
+  - cn: 'Web {{ domain}}'
+    type: 'ecc'
+    curve: 'secp521r1'
+    pass: '{{ vault_pass }}'
+    country: 'FR'
+    state: 'FRANCE'
+    locality: 'Nice'
+    o: EXAMPLE
+    ou: EXAMPLE CA UNIT
+    email: "adminca@{{ domain }}"
+    type: 'server'
+    san: '{ DNS:www.example.com,DNS:yyy.exammple.com }'}
+    provider: ownca

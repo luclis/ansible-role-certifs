@@ -1,0 +1,18 @@
+---
+# defaults vault file for certifss.
+
+#This file regroup all the secrets values. THIS IS AN EXAMPLE ONLY AND SHOULD BE WRITE WITH ANSIBLE VAULT.
+# You can run `ansible-vault encrypt vault.yml` in order to encrypt it.
+# You must run the playbook with the --ask-vault-pass parameter.
+
+vault_root_ca_login:
+  username: 'root CA {{ domain }}'
+  password: ''
+
+vault_delegated_ca_login:
+  username: 'delegated CA {{ domain }}'
+  password: ''
+
+vault_certificate_login:
+  username: 'Example {{ domain }}'
+  password: ''

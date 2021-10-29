@@ -1,0 +1,64 @@
+---
+#Tasks for generating clients certificates
+
+- name: Generate the key file
+  community.crypto.openssl_privatekey:
+    type: "{{ item.type }}"
+    curve: "{{ item.curve | default(omit) }}"
+    size: "{{ item.size | default(omit) }}"
+    path: "{{ certs_dir.key }/{{ item.cn }}.key"
+    passphrase: '{{ item.pass | default(omit) }}'
+    mode: 0600
+    owner: '{{ admin_linux }}'
+    group: '{{ admin_linux }}'
+    register: private_key
+    loop: "{{ certificate_list }}"
+
+- name: Generate the csr associate
+  community.crypto.openssl_csr:
+    common_name: "{{ item.cn }}"
+    country_name: "{{ item.country | default("{{ default.personalize.country }}") }}"
+    state_or_province_name: "{{ item.state | default("{{ default.personalize.state }}") }}"
+    locality_name: "{{ item.locality | default("{{ default.personalize.locality }}") }}"
+    organization_name: "{{ item.o | default("{{ default.personalize.o }}") }}"
+    organizational_unit_name: "{{ item.ou | default("{{ default.personalize.ou }}") }}"
+    email_address: "{{ item.email | default("{{ default.personalize.email }}") }}"
+    basic_constraints: "item[type]['basic_constraints'] | default(omit)"
+    basic_constraints_critical: "item[type]['basic_constraints_critical']"
+    key_usage: "item[type]['KU'] | default(omit)"
+    key_usage_critical: "item[type]['ku_critical']"
+    extended_key_usage: "item[type]['EKU'] | default(omit)"
+    extended_key_usage_critical: "item[type]['eku_critical']"
+    subject_alt_name: "{{ item.san | default(omit) }}"
+    crl_distribution_points: "{{ crl_delegated }}"
+    path: "{{ certs_dir.csr }}/{{ item.cn }}.csr"
+    private_key_path: "{{ private_key.filename }}"
+    mode: 0600
+    owner: '{{ admin_linux }}'
+    group: '{{ admin_linux }}'
+    return_content: yes
+  register: signing_request
+  loop: "{{ certificate_list }}"
+
+- name: Sign certificate
+  community.crypto.x509_certificate:
+    csr_content: "{{ signing_request.csr }}"
+    provider: "{{ provider | ternary(provider, 'selfsigned') }}"
+    ownca_path: "{{ certs_dir.pem }}/{{ ca.pem }}"
+    ownca_privatekey_path: "{{ certs_dir.ca }}/{{ ca.key }}"
+    ownca_privatekey_passphrase:  "{{ ca.pass | default(omit) }}"
+    ownca_digest: "{{ ca.digest | default(omit) }}"
+    ownca_not_before: "{{ ca.before | default(omit) }}"
+    ownca_not_after: "{{ ca.after | default(omit) }}"
+    mode: 0600
+    owner: '{{ admin_linux }}'
+    group: '{{ admin_linux }}'
+    return_content: yes
+  delgated_to: CA
+  register: certificate
+
+- name: export certificate
+  ansible.builtin.copy:
+    path: "{{ certs_dir.pem }}/{{ item.cn }}.pem"
+    content: "{{ certificate.certificate }}"
+  loop: "{{ certificate_list }}"

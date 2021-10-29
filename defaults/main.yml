@@ -1,0 +1,143 @@
+---
+# Defaults file for ansible-role-certifs
+#switch
+install_pki: false
+
+#Generals
+admin_linux: root
+domain: example.com
+
+certs_fqdn: 'certs.example.com'
+path_pki: '/srv/PKI'
+
+#Configuring openssl
+default:
+  root:
+    days: 1825 #5 years, 1 day
+    crl_days: 30
+    digest: sha512
+    bits: 8192
+    policy: supplied
+  delegated:
+    days: 365 #1 year
+    crl_days: 15
+    digest: sha512
+    bits: 4096
+    policy: match
+  personalize:
+    country: FR
+    state: FRANCE
+    locality: Nice
+    o: EXAMPLE
+    ou: EXAMPLE CA UNIT
+    email: "adminca@{{ domain }}"
+
+roles:
+  root_ca:
+    basic_constraints_critical: true
+    eku_critical: false
+    ku_critical: true
+    basic_constraints:
+      - 'CA:TRUE'
+      - 'pathlen:1'
+    eku: ''
+    ku:
+      - keyCertSign
+      - cRLSign
+  delegated_ca:
+    authority: root
+    basic_constraints_critical: true
+    eku_critical: false
+    ku_critical: true
+    basic_constraints:
+      - 'CA:TRUE'
+      - 'pathlen:0'
+    eku: ''
+    ku:
+      - keyCertSign
+      - cRLSign
+  server:
+    authority: delegated
+    basic_constraints_critical: false
+    ku_critical: true
+    eku_critical: false
+    basic_constraints: 'CA:FALSE'
+    eku: "serverAuth"
+    ku:
+      - digitalSignature
+      - keyEncipherment
+      - dataEncipherment
+  firewall:
+    authority: delegated
+    basic_constraints_critical: false
+    ku_critical: true
+    eku_critical: false
+    basic_constraints: 'CA:FALSE'
+    eku: "serverAuth"
+    ku:
+      - digitalSignature
+      - keyEncipherment
+      - nonRepudiation
+  ipsec:
+    authority: delegated
+    basic_constraints_critical: false
+    ku_critical: false
+    eku_critical: false
+    basic_constraints: 'CA:FALSE'
+    eku: 'serverAuth'
+    ku: ''
+  client:
+    authority: delegated
+    basic_constraints_critical: false
+    ku_critical: true
+    eku_critical: false
+    basic_constraints: 'CA:FALSE'
+    eku: 'clientAuth'
+    ku:
+      - digitalSignature
+      - nonRepudiation
+  code_sign:
+    authority: delegated
+    basic_constraints_critical: false
+    ku_critical: true
+    eku_critical: true
+    basic_constraints: 'CA:FALSE'
+    eku:
+      - codeSigning
+      - msCodeCom
+    ku: digitalSignature
+  user:
+    authority: delegated
+    basic_constraints_critical: false
+    ku_critical: true
+    eku_critical: true
+    basic_constraints: 'CA:FALSE'
+    eku:
+      - codeSigning
+      - msCodeInd
+    ku: digitalSignature
+
+crl_delegated:
+- full_name:
+    - "URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.delegated }}.crl"
+  crl_issuer:
+    - "URI:http://{{ certs_fqdn}}"
+  reasons:
+    - key_compromise
+    - affiliation_changed
+    - superseded
+    - cessation_of_operation
+    - privilege_withdrawn
+
+crl_root:
+- full_name:
+    - "URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.root }}.crl"
+  crl_issuer:
+    - "URI:http://{{ certs_fqdn }}"
+  reasons:
+    - key_compromise
+    - ca_compromise
+    - aa_compromise
+    - superseded
+    - cessation_of_operation
+    - privilege_withdrawn

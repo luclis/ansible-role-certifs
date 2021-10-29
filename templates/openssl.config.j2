@@ -1,0 +1,93 @@
+# Fichier de configuration customise
+#
+
+[ ca ]
+default_ca      = {{ authority }}-ca
+#
+# L autorite de certification racine (root) valable 10 ans et 1 jours et genere des ACD de 5 ans.
+#
+
+[ {{ authority }}-ca ]
+dir             = {{ path_domain }}/{{ authority }}_ca
+dirconf         = {{ path_domain }}/{{ authority }}_ca/.pki
+certs           = $dir/public/
+new_certs_dir   = $dir/signcert/
+certificate     = $dir/public/{{ certs_name[authority] }}.pem
+private_key     = $dir/private/{{ certs_name[authority] }}.key
+database        = $dirconf/index
+serial          = $dirconf/serial
+crl             = $dir/crl/crl.pem
+crl_number      = $dirconf/crlserial
+default_crl_days= {{ defaut[authority]['crl_days'] }}
+default_days    = {{ defaut[authority]['days'] }}
+default_md      = {{ defaut[authority]['digest'] }}
+default_bits    = {{ defaut[authority]['bits'] }}
+preserve        = no
+policy          = policy_{{ defaut[authority]['policy'] }}
+
+[ policy_supplied ]
+countryName             = supplied
+stateOrProvinceName     = supplied
+localityName            = supplied
+organizationName        = match
+organizationalUnitName  = match
+emailAddress            = supplied
+commonName              = supplied
+
+[ policy_match ]
+
+countryName             = match
+stateOrProvinceName     = match
+localityName            = supplied
+organizationName        = match
+organizationalUnitName  = optional
+emailAddress            = optional
+commonName              = supplied
+
+[ policy_anything ]
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+emailAddress            = optional
+commonName              = supplied
+
+
+#
+# Defaults requierement.
+#
+[ req ]
+distinguished_name      = req_distinguished_name
+[ req_distinguished_name ]
+countryName	                    = Country Name (2 letter code)
+countryName_default             = {{ defaut.personalize.country }}
+countryName_min	                = 2
+countryName_max	                = 2
+stateOrProvinceName             = State or Province Name (full name)
+stateOrProvinceName_default     = {{ defaut.personalize.state }}
+localityName                    = Locality Name (eg, city)
+localityName_default            = {{ defaut.personalize.locality }}
+0.organizationName              = Organization Name (eg, company)
+0.organizationName_default      = {{ defaut.personalize.o }}
+organizationalUnitName          = Organizational Unit Name (eg, section)
+organizationalUnitName_default  = {{ defaut.personalize.ou }}
+commonName                      = Common Name (eg, YOUR name)
+commonName_max                  = 64
+emailAddress                    = Email Address
+emailAddress_default            = {{ defaut.personalize.email }}
+emailAddress_max                = 64
+
+{ % for key,role in roles.item() %}
+[ {{ key | upper }} ]
+nsComment                       = "{{ key }}"
+subjectKeyIdentifier            = hash
+{% if role.basic_constraints %}basicConstraints                = {% if role.basic_constraints_critical is true%}critical,{% endif %}{{ role.basic_constraints | join(',')}}
+{% endif %}{% if role.eku %}extendedKeyUsage                = {% if role.eku_critical is true%}critical,{% endif %}{{ role.eku | join(',') }}
+{% endif %}{% if role.ku %}keyUsage                = {% if role.basic_constraints_critical is true%}critical,{% endif %}{{ role.ku | join(',') }}
+{% endif %}{% if role.authority is defined and role.authority is equal 'root' %}crlDistributionPoints           = URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.root }}.crl
+authorityKeyIdentifier          = keyid,issuer:always
+authorityInfoAccess             = caIssuers;URI:http://{{ certs_fqdn }}/CA/{{ certs_name.root }}.pem{% else %}crlDistributionPoints           = URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.delegated }}.crl
+authorityKeyIdentifier          = keyid,issuer:always
+authorityInfoAccess             = caIssuers;URI:http://{{ certs_fqdn }}/CA/{{ certs_name.delegated }}.pem
+{% endif %}

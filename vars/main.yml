@@ -1,0 +1,20 @@
+---
+# Vars file for ansible-role-certifs
+
+certs_name:
+  root: 'ACR_{{ domain }}'
+  delegated: 'ACD_{{ domain }}'
+
+
+path_domain: '{{ path_pki }}/{{ domain }}'
+path_conf: '{{ path_pki }}/.pki/{{ domain }}/config'
+
+
+ca:
+  pem: "{{ path_domain }}/{{ authority }}_ca/public/{{ certs_name[authority] }}"
+  key: "{{ path_domain }}/{{ authority }}_ca/private/{{ certs_name[authority] }}"
+  pass: "{{ [authority]_ca_login.password }}"
+  digest: {{ default[authority]['digest'] }}
+  format: pem
+  before: "+0s"
+  after: "+{{ default[authority]['days'] }}d"

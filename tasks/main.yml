@@ -1,0 +1,23 @@
+---
+
+- name: Install Own Private Key Infrastructure
+  block:
+  - name: Include password lookup
+    include_tasks: "password.yml"
+    delegated_to: localhost
+
+  - name: Install root ca
+    include_tasks: "authority.yml"
+    delegated_to: localhost #We don't want to put the CA on an online computer, only local.
+    vars:
+      authority: root
+
+  - name: Install delegated ca
+    include_tasks: "authority.yml"
+    vars:
+      authority: delegated
+  when: install_pki is true
+# Comment vérifier que le certificat n'existe pas déjà ?
+
+- name: Generate the certificate
+  include_tasks: "clients.yml"
