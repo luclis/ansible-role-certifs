@@ -1,11 +1,12 @@
 ---
 #Tasks file for ansible-role-certifs
 
+- name: Include password lookup
+  include_tasks: "password.yml"
+  delegated_to: localhost
+
 - name: Install Own Private Key Infrastructure
   block:
-  - name: Include password lookup
-    include_tasks: "password.yml"
-    delegated_to: localhost
 
   - name: Install root ca
     include_tasks: "authority.yml"
