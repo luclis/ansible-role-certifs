@@ -1,5 +1,6 @@
 ---
 # Defaults file for ansible-role-certifs
+
 #switch
 install_pki: false
 
