@@ -7,6 +7,16 @@ install_pki: false
 admin_linux: root
 domain: example.com
 
+keepass:
+  database: "{{ vault_keepass.database }}"
+  passwd: "{{ vault_keepass.passwd }}"
+  keyfile: "{{ vault_keepass.keyfile }}"
+  length: "{{ vault_keepass.length }}"
+
+credential_store: "{{ vault_credential_store }}"
+server:
+  name: ''
+
 certs_fqdn: 'certs.example.com'
 path_pki: '/srv/PKI'
 

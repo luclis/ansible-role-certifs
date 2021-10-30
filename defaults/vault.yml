@@ -5,6 +5,14 @@
 # You can run `ansible-vault encrypt vault.yml` in order to encrypt it.
 # You must run the playbook with the --ask-vault-pass parameter.
 
+vault_keepass:
+  database: "Path/to/Database.kdbx"
+  passwd: 'PASSWORD'
+  keyfile: 'PATH/TO/KEYFILE'
+  length: '16'
+
+vault_credential_store: "~/.credentials/"
+
 vault_root_ca_login:
   username: 'root CA {{ domain }}'
   password: ''
