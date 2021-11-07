@@ -130,9 +130,9 @@ extensions:
 
 crl_delegated:
 - full_name:
-    - "URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.delegated }}.crl"
+    - "URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.delegated | upper }}.crl"
   crl_issuer:
-    - "URI:http://{{ certs_fqdn}}"
+    - "URI:http://{{ certs_fqdn}}/CA/{{ certs_name.delegated | upper }}.pem"
   reasons:
     - key_compromise
     - affiliation_changed
@@ -142,9 +142,9 @@ crl_delegated:
 
 crl_root:
 - full_name:
-    - "URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.root }}.crl"
+    - "URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.root | upper }}.crl"
   crl_issuer:
-    - "URI:http://{{ certs_fqdn }}"
+    - "URI:http://{{ certs_fqdn }}/CA/{{ certs_name.root | upper }}.pem"
   reasons:
     - key_compromise
     - ca_compromise
