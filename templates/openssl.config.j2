@@ -18,12 +18,12 @@ database        = $dirconf/index
 serial          = $dirconf/serial
 crl             = $dir/crl/crl.pem
 crl_number      = $dirconf/crlserial
-default_crl_days= {{ defaut[authority]['crl_days'] }}
-default_days    = {{ defaut[authority]['days'] }}
-default_md      = {{ defaut[authority]['digest'] }}
-default_bits    = {{ defaut[authority]['bits'] }}
+default_crl_days= {{ default[authority]['crl_days'] }}
+default_days    = {{ default[authority]['days'] }}
+default_md      = {{ default[authority]['digest'] }}
+default_bits    = {{ default[authority]['bits'] }}
 preserve        = no
-policy          = policy_{{ defaut[authority]['policy'] }}
+policy          = policy_{{ default[authority]['policy'] }}
 
 [ policy_supplied ]
 countryName             = supplied
@@ -61,21 +61,21 @@ commonName              = supplied
 distinguished_name      = req_distinguished_name
 [ req_distinguished_name ]
 countryName	                    = Country Name (2 letter code)
-countryName_default             = {{ defaut.personalize.country }}
+countryName_default             = {{ default.personalize.country }}
 countryName_min	                = 2
 countryName_max	                = 2
 stateOrProvinceName             = State or Province Name (full name)
-stateOrProvinceName_default     = {{ defaut.personalize.state }}
+stateOrProvinceName_default     = {{ default.personalize.state }}
 localityName                    = Locality Name (eg, city)
-localityName_default            = {{ defaut.personalize.locality }}
+localityName_default            = {{ default.personalize.locality }}
 0.organizationName              = Organization Name (eg, company)
-0.organizationName_default      = {{ defaut.personalize.o }}
+0.organizationName_default      = {{ default.personalize.o }}
 organizationalUnitName          = Organizational Unit Name (eg, section)
-organizationalUnitName_default  = {{ defaut.personalize.ou }}
+organizationalUnitName_default  = {{ default.personalize.ou }}
 commonName                      = Common Name (eg, YOUR name)
 commonName_max                  = 64
 emailAddress                    = Email Address
-emailAddress_default            = {{ defaut.personalize.email }}
+emailAddress_default            = {{ default.personalize.email }}
 emailAddress_max                = 64
 
 { % for key,role in roles.item() %}
