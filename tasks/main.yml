@@ -14,12 +14,15 @@
     vars:
       authority: root
       children: root
+      certificate_children: "{{ certificate_root }}"
 
   - name: Install delegated ca
     include_tasks: "authority.yml"
     vars:
       authority: root
       children: delegated
+      certificate_children: "{{ certificate_delegated }}"
+
   when: install_pki is true
 # Comment vérifier que le certificat n'existe pas déjà ?
 

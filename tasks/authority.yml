@@ -53,49 +53,49 @@
 
 - name: Generate the key file.
   community.crypto.openssl_privatekey:
-    type: "{{ item.type }}"
-    curve: "{{ item.curve | default(omit) }}"
-    size: "{{ item.size | default(omit) }}"
-    passphrase: '{{ item.pass | default(omit) }}'
+    type: "{{ certificate_children.algo }}"
+    curve: "{{ certificate_children.curve | default(omit) }}"
+    size: "{{ certificate_children.size | default(omit) }}"
+    path: "{{ path_domain }}/{{ children }}_ca/private/{{ certs_name[children] | upper }}.key"
+    passphrase: '{{ certificate_children.pass | default(omit) }}'
     mode: 0600
     owner: '{{ admin_linux }}'
     group: '{{ admin_linux }}'
     register: private_key
-    loop: "{{ certificate_[authority] }}"
 
 - name: Generate the csr associate.
   community.crypto.openssl_csr:
-    common_name: "{{ item.cn }}"
-    country_name: "{{ item.country | default("{{ default.personalize.country }}") }}"
-    state_or_province_name: "{{ item.state | default("{{ default.personalize.state }}") }}"
-    locality_name: "{{ item.locality | default("{{ default.personalize.locality }}") }}"
-    organization_name: "{{ item.o | default("{{ default.personalize.o }}") }}"
-    organizational_unit_name: "{{ item.ou | default("{{ default.personalize.ou }}") }}"
-    email_address: "{{ item.email | default("{{ default.personalize.email }}") }}"
-    basic_constraints: "item[type]['basic_constraints'] | default(omit)"
-    basic_constraints_critical: "item[type]['basic_constraints_critical'] | default(omit)"
-    key_usage: "item[type]['KU'] | default(omit)"
-    key_usage_critical: "item[type]['ku_critical'] | default(omit)"
-    extended_key_usage: "item[type]['EKU'] | default(omit)"
-    extended_key_usage_critical: "item[type]['eku_critical'] | default(omit)"
-    subject_alt_name: "{{ item.san | default(omit) }}"
+    common_name: "{{ certificate_children.cn }}"
+    country_name: "{{ certificate_children.country | default('{{ default.personalize.country }}') }}"
+    state_or_province_name: "{{ certificate_children.state | default('{{ default.personalize.state }}') }}"
+    locality_name: "{{ certificate_children.locality | default('{{ default.personalize.locality }}') }}"
+    organization_name: "{{ certificate_children.o | default('{{ default.personalize.o }}') }}"
+    organizational_unit_name: "{{ certificate_children.ou | default('{{ default.personalize.ou }}') }}"
+    email_address: "{{ certificate_children.email | default('{{ default.personalize.email }}') }}"
+    basic_constraints: "{{ certificate_children['type']['basic_constraints'] | default(omit) }}"
+    basic_constraints_critical: "{{ certificate_children['type']['basic_constraints_critical'] | default(omit) }}"
+    key_usage: "{{ certificate_children['type']['KU'] | default(omit) }}"
+    key_usage_critical: "{{ certificate_children['type']['ku_critical'] | default(omit) }}"
+    extended_key_usage: "{{ certificate_children['type']['EKU'] | default(omit) }}"
+    extended_key_usage_critical: "{{ certificate_children['type']['eku_critical'] | default(omit) }}"
+    subject_alt_name: "{{ certificate_children.san | default(omit) }}"
     crl_distribution_points: "{{ crl_delegated }}"
     private_key_path: "{{ private_key.filename }}"
     path: "{{ path_domain }}/{{ authority }}_ca/request/{{ certs_name[children] | upper }}.csr"
+    privatekey_passphrase: "{{ certificate_children.pass | default(omit) }}"
     mode: 0600
     owner: '{{ admin_linux }}'
     group: '{{ admin_linux }}'
     return_content: yes
   register: signing_request
-  loop: "{{ certificate_[authority] }}"
 
 - name: Sign certificate.
   community.crypto.x509_certificate:
     csr_content: "{{ signing_request.csr }}"
-    provider: "{{ provider | default('selfsigned') }}"
     path: "{{ path_domain }}/{{ children }}_ca/public/{{ certs_name[children] | upper }}.pem"
+    provider: "{{ certificate_children.provider | default('selfsigned') }}"
     privatekey_path: "{{ private_key.filename | default(omit) }}"
-    privatekey_passphrase: "{{ root_ca_login.password | default(omit) }}"
+    privatekey_passphrase: "{{ certificate_children.pass | default(omit) }}"
     selfsigned_digest: "{{ ca.digest | default(omit) }}"
     selfsigned_not_before: "{{ ca.before | default(omit) }}"
     selfsigned_not_after: "{{ ca.after | default(omit) }}"
@@ -110,7 +110,6 @@
     group: '{{ admin_linux }}'
     return_content: yes
   register: certificate
-  loop: "{{ certificate_[authority] }}"
 
 - name: export certificate
   ansible.builtin.copy:
