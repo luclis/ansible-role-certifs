@@ -14,38 +14,35 @@ certificate_login:
   password: '{{ vault_certificate_login.password }}'
 
 certificate_root:
-  - cn: '{{ certs_name.root }}'
-    type: 'ecc'
-    curve: 'secp521r1'
-    pass: '{{ root_ca_login.passwd }}'
-    country: 'FR'
-    state: 'FRANCE'
-    locality: 'Nice'
-    o: EXAMPLE
-    ou: EXAMPLE CA UNIT
-    email: "adminca@{{ domain }}"
-    type: 'root_ca'
-    provider: selfsigned
+  cn: '{{ root_ca_login.username }}'
+  algo: 'Ed448'
+  pass: '{{ root_ca_login.password }}'
+  country: 'FR'
+  state: 'FRANCE'
+  locality: 'Nice'
+  o: "{{ domain.split('.')[0] | upper }}"
+  ou: "{{ domain.split('.')[0] | upper }} CA UNIT"
+  email: "adminca@{{ domain }}"
+  type: 'root_ca'
+  provider: selfsigned
 
 certificate_delegated:
-  - cn: '{{ certs_name.delegated }}'
-    type: 'ecc'
-    curve: 'secp521r1'
-    pass: '{{ vault_delegated_ca.passwd }}'
-    country: 'FR'
-    state: 'FRANCE'
-    locality: 'Nice'
-    o: EXAMPLE
-    ou: EXAMPLE CA UNIT
-    email: "adminca@{{ domain }}"
-    type: 'delegated_ca'
-    provider: ownca
+  cn: '{{ delegated_ca_login.username }}'
+  algo: 'Ed448'
+  pass: '{{ delegated_ca_login.password }}'
+  country: 'FR'
+  state: 'FRANCE'
+  locality: 'Nice'
+  o: "{{ domain.split('.')[0] | upper }}"
+  ou: "{{ domain.split('.')[0] | upper }} CA UNIT"
+  email: "adminca@{{ domain }}"
+  type: 'delegated_ca'
+  provider: ownca
 
 certificate_list:
-  - cn: 'Web {{ domain}}'
-    type: 'ecc'
-    curve: 'secp521r1'
-    pass: '{{ vault_pass }}'
+  - cn: 'Web {{ domain }}'
+    algo: 'Ed448'
+    pass: '{{ certificate_login.password }}'
     country: 'FR'
     state: 'FRANCE'
     locality: 'Nice'
