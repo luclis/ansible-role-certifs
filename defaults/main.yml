@@ -43,7 +43,7 @@ default:
     ou: "{{ domain.split('.')[0] | upper }} CA UNIT"
     email: "adminca@{{ domain }}"
 
-roles:
+extensions:
   root_ca:
     basic_constraints_critical: true
     eku_critical: false

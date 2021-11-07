@@ -78,16 +78,16 @@ emailAddress                    = Email Address
 emailAddress_default            = {{ default.personalize.email }}
 emailAddress_max                = 64
 
-{ % for key,role in roles.item() %}
+{% for key,extension in extensions.items() %}
 [ {{ key | upper }} ]
 nsComment                       = "{{ key }}"
 subjectKeyIdentifier            = hash
-{% if role.basic_constraints %}basicConstraints                = {% if role.basic_constraints_critical is true%}critical,{% endif %}{{ role.basic_constraints | join(',')}}
-{% endif %}{% if role.eku %}extendedKeyUsage                = {% if role.eku_critical is true%}critical,{% endif %}{{ role.eku | join(',') }}
-{% endif %}{% if role.ku %}keyUsage                = {% if role.basic_constraints_critical is true%}critical,{% endif %}{{ role.ku | join(',') }}
-{% endif %}{% if role.authority is defined and role.authority is equal 'root' %}crlDistributionPoints           = URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.root }}.crl
+{% if extension.basic_constraints %}basicConstraints                = {% if extension.basic_constraints_critical is true%}critical,{% endif %}{{ extension.basic_constraints | join(',')}}
+{% endif %}{% if extension.eku %}extendedKeyUsage                = {% if extension.eku_critical is true%}critical,{% endif %}{{ extension.eku | join(',') }}
+{% endif %}{% if extension.ku %}keyUsage                = {% if extension.basic_constraints_critical is true%}critical,{% endif %}{{ extension.ku | join(',') }}
+{% endif %}{% if extension.authority is defined and extension.authority == 'root' %}crlDistributionPoints           = URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.root }}.crl
 authorityKeyIdentifier          = keyid,issuer:always
 authorityInfoAccess             = caIssuers;URI:http://{{ certs_fqdn }}/CA/{{ certs_name.root }}.pem{% else %}crlDistributionPoints           = URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.delegated }}.crl
 authorityKeyIdentifier          = keyid,issuer:always
 authorityInfoAccess             = caIssuers;URI:http://{{ certs_fqdn }}/CA/{{ certs_name.delegated }}.pem
-{% endif %}
+{% endif %}{% endfor%}
