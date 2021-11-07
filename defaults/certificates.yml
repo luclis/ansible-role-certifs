@@ -1,5 +1,5 @@
 ---
-#This variable file specifie the defaults parameters for the root certificate, the delegated and an example.
+#This variable file specifie the defaults parameters for the root certificate, the delegated and an example. You must personalize it and put it in the default file or any other variables file.
 
 root_ca_login:
   username: '{{ vault_root_ca_login.username }}'
