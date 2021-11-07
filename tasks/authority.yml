@@ -125,3 +125,7 @@
     content: "{{ certificate_info.serial_number +1 }}"
     dest: "{{ path_pki }}/{{ domain }}/{{ children }}_ca/.pki/serial"
 
+- name: Concate the CA in one file
+  ansible.builtin.shell:
+    cmd: "cat {{ path_domain }}/{{ children }}_ca/public/{{ certs_name[children] | upper }}.pem {{ path_domain }}/{{ authority }}_ca/public/{{ certs_name[authority] | upper }}.pem > {{ path_domain }}/{{ children }}_ca/public/{{ certs_name['chain'] | upper }}.pem"
+# Trouver une façon de faire ça mieux.

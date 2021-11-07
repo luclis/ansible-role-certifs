@@ -4,6 +4,7 @@
 certs_name:
   root: 'ACR_{{ domain }}'
   delegated: 'ACD_{{ domain }}'
+  chain: 'ca_chain'
 
 
 path_domain: '{{ path_pki }}/{{ domain }}'
