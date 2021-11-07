@@ -7,15 +7,17 @@
     state: latest
 
 - name: Include password lookup
-  include_tasks: "password.yml"
-  delegated_to: localhost
+  include_tasks:
+    file: "password.yml"
+  args:
+    apply:
+      delegate_to: localhost
+  tags: always
 
 - name: Install Own Private Key Infrastructure
   block:
-
   - name: Install root ca
     include_tasks: "authority.yml"
-    delegated_to: localhost #We don't want to put the CA on an online computer, only local.
     vars:
       authority: root
       children: root

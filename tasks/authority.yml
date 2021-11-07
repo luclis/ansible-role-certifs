@@ -58,10 +58,11 @@
     size: "{{ certificate_children.size | default(omit) }}"
     path: "{{ path_domain }}/{{ children }}_ca/private/{{ certs_name[children] | upper }}.key"
     passphrase: '{{ certificate_children.pass | default(omit) }}'
+    cipher: 'auto'
     mode: 0600
     owner: '{{ admin_linux }}'
     group: '{{ admin_linux }}'
-    register: private_key
+  register: private_key
 
 - name: Generate the csr associate.
   community.crypto.openssl_csr:
@@ -80,8 +81,8 @@
     extended_key_usage_critical: "{{ certificate_children['type']['eku_critical'] | default(omit) }}"
     subject_alt_name: "{{ certificate_children.san | default(omit) }}"
     crl_distribution_points: "{{ crl_delegated }}"
-    private_key_path: "{{ private_key.filename }}"
     path: "{{ path_domain }}/{{ authority }}_ca/request/{{ certs_name[children] | upper }}.csr"
+    privatekey_path: "{{ private_key.filename }}"
     privatekey_passphrase: "{{ certificate_children.pass | default(omit) }}"
     mode: 0600
     owner: '{{ admin_linux }}'
@@ -124,4 +125,5 @@
 - name: Generate the serial of the PKI.
   ansible.builtin.copy:
     content: "{{ certificate_info.serial_number +1 }}"
-    path: "{{ path_pki }}/{{ domain }}/{{ authority }}_ca/.pki/{{ item }}/serial"
+    dest: "{{ path_pki }}/{{ domain }}/{{ children }}_ca/.pki/serial"
+
