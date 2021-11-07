@@ -18,7 +18,7 @@ credential_store: "{{ vault_credential_store }}"
 server:
   name: ''
 
-certs_fqdn: 'certs.example.com'
+certs_fqdn: 'certs.{{ domain }}'
 path_pki: '/srv/PKI'
 
 #Configuring openssl
@@ -39,8 +39,8 @@ default:
     country: FR
     state: FRANCE
     locality: Nice
-    o: EXAMPLE
-    ou: EXAMPLE CA UNIT
+    o: "{{ domain.split('.')[0] | upper }}"
+    ou: "{{ domain.split('.')[0] | upper }} CA UNIT"
     email: "adminca@{{ domain }}"
 
 roles:

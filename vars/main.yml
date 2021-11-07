@@ -11,10 +11,10 @@ path_conf: '{{ path_pki }}/.pki/{{ domain }}/config'
 
 
 ca:
-  pem: "{{ path_domain }}/{{ authority }}_ca/public/{{ certs_name[authority] }}"
-  key: "{{ path_domain }}/{{ authority }}_ca/private/{{ certs_name[authority] }}"
   pass: "{{ [authority]_ca_login.password }}"
   digest: {{ default[authority]['digest'] }}
+  pem: "{{ path_domain }}/{{ authority }}_ca/public/{{ certs_name[authority] | upper }}"
+  key: "{{ path_domain }}/{{ authority }}_ca/private/{{ certs_name[authority] | upper }}"
   format: pem
   before: "+0s"
   after: "+{{ default[authority]['days'] }}d"
