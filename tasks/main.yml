@@ -1,6 +1,11 @@
 ---
 #Tasks file for ansible-role-certifs
 
+- name: Install cryptography library
+  ansible.builtin.pip:
+    name: cryptography
+    state: latest
+
 - name: Include password lookup
   include_tasks: "password.yml"
   delegated_to: localhost
