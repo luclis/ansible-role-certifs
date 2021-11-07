@@ -26,7 +26,6 @@
       - private
       - export
       - request
-      - signed
       - crl
       - ".pki"
 
@@ -39,7 +38,6 @@
     loop:
       - index
       - index.attr
-      - serial
 
 - name: "Generate openssl config."
   template:
