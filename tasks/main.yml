@@ -13,11 +13,13 @@
     delegated_to: localhost #We don't want to put the CA on an online computer, only local.
     vars:
       authority: root
+      children: root
 
   - name: Install delegated ca
     include_tasks: "authority.yml"
     vars:
-      authority: delegated
+      authority: root
+      children: delegated
   when: install_pki is true
 # Comment vérifier que le certificat n'existe pas déjà ?
 

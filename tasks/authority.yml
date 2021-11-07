@@ -13,10 +13,10 @@
       - "{{ path_pki }}"
       - "{{ path_domain }}"
       - "{{ path_conf }}"
-      - "{{ path_domain }}/{{ authority }}_ca"
+      - "{{ path_domain }}/{{ children }}_ca"
 
   - ansible.builtin.file:
-      name: "{{ path_domain }}/{{ authority }}_ca/{{ item }}"
+      name: "{{ path_domain }}/{{ children }}_ca/{{ item }}"
       state: directory
       owner: "{{ admin_linux }}"
       group: "{{ admin_linux }}"
@@ -32,8 +32,7 @@
 
   - ansible.builtin.copy:
       src: "{{ item }}"
-      dest: "{{ path_pki }}/{{ domain }}/{{ authority }}_ca/.pki/{{ item }}"
-      state: touch
+      dest: "{{ path_pki }}/{{ domain }}/{{ children }}_ca/.pki/{{ item }}"
       owner: "{{ admin_linux }}"
       group: "{{ admin_linux }}"
       mode: 0600
@@ -45,7 +44,7 @@
 - name: "Generate openssl config."
   template:
     src: "openssl.config.j2"
-    dest: "{{ path_conf }}/openssl.{{ authority }}"
+    dest: "{{ path_conf }}/openssl.{{ children }}"
     owner: "{{ admin_linux }}"
     group: "{{ admin_linux }}"
     mode: 0600
@@ -57,7 +56,6 @@
     type: "{{ item.type }}"
     curve: "{{ item.curve | default(omit) }}"
     size: "{{ item.size | default(omit) }}"
-    path: "{{ path_domain }}/{{ authority }}_ca/private/{{ item.cn }}.key"
     passphrase: '{{ item.pass | default(omit) }}'
     mode: 0600
     owner: '{{ admin_linux }}'
@@ -82,8 +80,8 @@
     extended_key_usage_critical: "item[type]['eku_critical'] | default(omit)"
     subject_alt_name: "{{ item.san | default(omit) }}"
     crl_distribution_points: "{{ crl_delegated }}"
-    path: "{{ path_domain }}/{{ authority }}_ca/request/{{ item.cn }}.csr"
     private_key_path: "{{ private_key.filename }}"
+    path: "{{ path_domain }}/{{ authority }}_ca/request/{{ certs_name[children] | upper }}.csr"
     mode: 0600
     owner: '{{ admin_linux }}'
     group: '{{ admin_linux }}'
@@ -94,15 +92,15 @@
 - name: Sign certificate.
   community.crypto.x509_certificate:
     csr_content: "{{ signing_request.csr }}"
-    path: {{ path_domain }}/{{ authority }}_ca/public/{{certs_name[authority] }}.pem | default(omit)"
     provider: "{{ provider | default('selfsigned') }}"
+    path: "{{ path_domain }}/{{ children }}_ca/public/{{ certs_name[children] | upper }}.pem"
     privatekey_path: "{{ private_key.filename | default(omit) }}"
     privatekey_passphrase: "{{ root_ca_login.password | default(omit) }}"
     selfsigned_digest: "{{ ca.digest | default(omit) }}"
     selfsigned_not_before: "{{ ca.before | default(omit) }}"
     selfsigned_not_after: "{{ ca.after | default(omit) }}"
-    ownca_path: "{{ path_domain }}/{{ authority }}_ca/public/{{certs_name[authority] }}.pem | default(omit)"
-    ownca_privatekey_path: "{{ path_domain }}/{{ authority }}_ca/private/{{certs_name[authority] }}.key | default(omit)"
+    ownca_path: "{{ path_domain }}/{{ authority }}_ca/public/{{ certs_name[authority] | upper }}.pem"
+    ownca_privatekey_path: "{{ path_domain }}/{{ authority }}_ca/private/{{ certs_name[authority] | upper }}.key"
     ownca_privatekey_passphrase:  "{{ ca.pass | default(omit) }}"
     ownca_digest: "{{ ca.digest | default(omit) }}"
     ownca_not_before: "{{ ca.before | default(omit) }}"
@@ -116,7 +114,7 @@
 
 - name: export certificate
   ansible.builtin.copy:
-    path: "{{ path_domain }}/{{ authority }}_ca/public/{{certs_name[authority] }}.pem"
+    dest: "{{ path_domain }}/{{ children }}_ca/public/{{certs_name[children] | upper }}.pem"
     content: "{{ certificate.certificate }}"
 
 - name: Get the serial.
