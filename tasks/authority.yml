@@ -29,6 +29,17 @@
       - crl
       - ".pki"
 
+  - ansible.builtin.file:
+      name: "{{ path_domain }}/{{ authority }}_ca/{{ item }}"
+      state: directory
+      owner: "{{ admin.username }}"
+      group: "{{ admin.username }}"
+      mode: 0700
+    loop:
+      - public
+      - request
+      - crl
+
   - ansible.builtin.copy:
       src: "{{ item }}"
       dest: "{{ path_pki }}/{{ domain }}/{{ children }}_ca/.pki/{{ item }}"
@@ -91,7 +102,7 @@
 - name: Sign certificate.
   community.crypto.x509_certificate:
     csr_content: "{{ signing_request.csr }}"
-    path: "{{ path_domain }}/{{ children }}_ca/public/{{ certs_name[children] | upper }}.pem"
+    path: "{{ path_domain }}/{{ authority }}_ca/public/{{ certs_name[children] | upper }}.pem"
     provider: "{{ certificate_children.provider | default('selfsigned') }}"
     privatekey_path: "{{ private_key.filename | default(omit) }}"
     privatekey_passphrase: "{{ certificate_children.pass | default(omit) }}"
