@@ -14,6 +14,8 @@
       delegate_to: localhost
   tags: always
 
+- ansible.builtin.set_fact:
+    ansible_become_password: "{{ ansible_default.password }}"
 - name: Install Own Private Key Infrastructure
   block:
   - name: Install root ca
@@ -22,6 +24,11 @@
       authority: root
       children: root
       certificate_children: "{{ certificate_root }}"
+    args:
+      apply:
+        delegate_to: localhost
+        become: yes
+        become_user: "{{ admin.username }}"
 
   - name: Install delegated ca
     include_tasks: "authority.yml"
@@ -29,7 +36,10 @@
       authority: root
       children: delegated
       certificate_children: "{{ certificate_delegated }}"
-
+    args:
+      apply:
+        become: yes
+        become_user: "{{ admin.username }}"
   when: install_pki is true
 # Comment vérifier que le certificat n'existe pas déjà ?
 
