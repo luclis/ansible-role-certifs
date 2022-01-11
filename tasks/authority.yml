@@ -120,6 +120,8 @@
     group: '{{ admin.username }}'
     return_content: yes
   register: certificate
+#  delegate_to: "{{ groups['Root_PKI'][0] }}"
+  delegate_to: localhost
 
 - name: export certificate
   ansible.builtin.copy:
