@@ -60,7 +60,7 @@ commonName              = supplied
 [ req ]
 distinguished_name      = req_distinguished_name
 [ req_distinguished_name ]
-countryName	                    = Country Name (2 letter code)
+countryName                     = Country Name (2 letter code)
 countryName_default             = {{ default.personalize.country }}
 countryName_min	                = 2
 countryName_max	                = 2
@@ -84,7 +84,7 @@ nsComment                       = "{{ key }}"
 subjectKeyIdentifier            = hash
 {% if extension.basic_constraints %}basicConstraints                = {% if extension.basic_constraints_critical is true%}critical,{% endif %}{{ extension.basic_constraints | join(',')}}
 {% endif %}{% if extension.eku %}extendedKeyUsage                = {% if extension.eku_critical is true%}critical,{% endif %}{{ extension.eku | join(',') }}
-{% endif %}{% if extension.ku %}keyUsage                = {% if extension.basic_constraints_critical is true%}critical,{% endif %}{{ extension.ku | join(',') }}
+{% endif %}{% if extension.ku %}keyUsage                  = {% if extension.basic_constraints_critical is true%}critical,{% endif %}{{ extension.ku | join(',') }}
 {% endif %}{% if extension.authority is defined and extension.authority == 'root' %}crlDistributionPoints           = URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.root }}.crl
 authorityKeyIdentifier          = keyid,issuer:always
 authorityInfoAccess             = caIssuers;URI:http://{{ certs_fqdn }}/CA/{{ certs_name.root }}.pem{% else %}crlDistributionPoints           = URI:http://{{ certs_fqdn }}/CRL/{{ certs_name.delegated }}.crl
