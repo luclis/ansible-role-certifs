@@ -6,8 +6,8 @@
   - ansible.builtin.file:
       name: "{{ item }}"
       state: "directory"
-      owner: "{{ admin_linux }}"
-      group: "{{ admin_linux }}"
+      owner: "{{ admin.username }}"
+      group: "{{ admin.username }}"
       mode: 0700
     loop:
       - "{{ path_pki }}"
@@ -18,8 +18,8 @@
   - ansible.builtin.file:
       name: "{{ path_domain }}/{{ children }}_ca/{{ item }}"
       state: directory
-      owner: "{{ admin_linux }}"
-      group: "{{ admin_linux }}"
+      owner: "{{ admin.username }}"
+      group: "{{ admin.username }}"
       mode: 0700
     loop:
       - public
@@ -32,8 +32,8 @@
   - ansible.builtin.copy:
       src: "{{ item }}"
       dest: "{{ path_pki }}/{{ domain }}/{{ children }}_ca/.pki/{{ item }}"
-      owner: "{{ admin_linux }}"
-      group: "{{ admin_linux }}"
+      owner: "{{ admin.username }}"
+      group: "{{ admin.username }}"
       mode: 0600
     loop:
       - index
@@ -43,8 +43,8 @@
   template:
     src: "openssl.config.j2"
     dest: "{{ path_conf }}/openssl.{{ children }}"
-    owner: "{{ admin_linux }}"
-    group: "{{ admin_linux }}"
+    owner: "{{ admin.username }}"
+    group: "{{ admin.username }}"
     mode: 0600
 
 #Generate the certificates
@@ -58,8 +58,8 @@
     passphrase: '{{ certificate_children.pass | default(omit) }}'
     cipher: 'auto'
     mode: 0600
-    owner: '{{ admin_linux }}'
-    group: '{{ admin_linux }}'
+    owner: '{{ admin.username }}'
+    group: '{{ admin.username }}'
   register: private_key
 
 - name: Generate the csr associate.
@@ -83,8 +83,8 @@
     privatekey_path: "{{ private_key.filename }}"
     privatekey_passphrase: "{{ certificate_children.pass | default(omit) }}"
     mode: 0600
-    owner: '{{ admin_linux }}'
-    group: '{{ admin_linux }}'
+    owner: '{{ admin.username }}'
+    group: '{{ admin.username }}'
     return_content: yes
   register: signing_request
 
@@ -105,8 +105,8 @@
     ownca_not_before: "{{ ca.before | default(omit) }}"
     ownca_not_after: "{{ ca.after | default(omit) }}"
     mode: 0600
-    owner: '{{ admin_linux }}'
-    group: '{{ admin_linux }}'
+    owner: '{{ admin.username }}'
+    group: '{{ admin.username }}'
     return_content: yes
   register: certificate
 

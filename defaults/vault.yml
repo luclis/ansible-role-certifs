@@ -13,6 +13,15 @@ vault_keepass:
 
 vault_credential_store: "~/.credentials/"
 
+vault_ansible_default:
+  username: 'user-ansible'
+  password: ''
+vault_ansible_default_group: 'user-ansible'
+vault_admin:
+  username: 'root'
+  password: ''
+vault_admin_group: 'root'
+
 vault_root_ca_login:
   username: 'root CA {{ domain }}'
   password: ''

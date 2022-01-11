@@ -5,7 +5,6 @@
 install_pki: false
 
 #Generals
-admin_linux: root
 domain: example.com
 
 keepass:
@@ -17,6 +16,12 @@ keepass:
 credential_store: "{{ vault_credential_store }}"
 server:
   name: ''
+admin:
+  username: '{{ vault_admin.username }}'
+  password: '{{ vault_admin.password }}'
+ansible_default:
+  username: '{{ vault_ansible_default.username }}'
+  password: '{{ vault_ansible_default.password }}'
 
 certs_fqdn: 'certs.{{ domain }}'
 path_pki: '/srv/PKI'
