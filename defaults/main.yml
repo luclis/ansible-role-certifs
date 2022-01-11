@@ -51,7 +51,8 @@ extensions:
     basic_constraints:
       - 'CA:TRUE'
       - 'pathlen:1'
-    eku: ''
+    eku:
+      - ''
     ku:
       - keyCertSign
       - cRLSign
@@ -63,7 +64,8 @@ extensions:
     basic_constraints:
       - 'CA:TRUE'
       - 'pathlen:0'
-    eku: ''
+    eku:
+      - ''
     ku:
       - keyCertSign
       - cRLSign
@@ -72,8 +74,10 @@ extensions:
     basic_constraints_critical: false
     ku_critical: true
     eku_critical: false
-    basic_constraints: 'CA:FALSE'
-    eku: "serverAuth"
+    basic_constraints:
+      - 'CA:FALSE'
+    eku:
+      - 'serverAuth'
     ku:
       - digitalSignature
       - keyEncipherment
@@ -83,8 +87,10 @@ extensions:
     basic_constraints_critical: false
     ku_critical: true
     eku_critical: false
-    basic_constraints: 'CA:FALSE'
-    eku: "serverAuth"
+    basic_constraints:
+      - 'CA:FALSE'
+    eku:
+      - 'serverAuth'
     ku:
       - digitalSignature
       - keyEncipherment
@@ -94,16 +100,21 @@ extensions:
     basic_constraints_critical: false
     ku_critical: false
     eku_critical: false
-    basic_constraints: 'CA:FALSE'
-    eku: 'serverAuth'
-    ku: ''
+    basic_constraints:
+      - 'CA:FALSE'
+    eku:
+      - 'serverAuth'
+    ku:
+      - ''
   client:
     authority: delegated
     basic_constraints_critical: false
     ku_critical: true
     eku_critical: false
-    basic_constraints: 'CA:FALSE'
-    eku: 'clientAuth'
+    basic_constraints:
+      - 'CA:FALSE'
+    eku:
+      - 'clientAuth'
     ku:
       - digitalSignature
       - nonRepudiation
@@ -112,21 +123,25 @@ extensions:
     basic_constraints_critical: false
     ku_critical: true
     eku_critical: true
-    basic_constraints: 'CA:FALSE'
+    basic_constraints:
+      - 'CA:FALSE'
     eku:
       - codeSigning
       - msCodeCom
-    ku: digitalSignature
+    ku:
+      - digitalSignature
   user:
     authority: delegated
     basic_constraints_critical: false
     ku_critical: true
     eku_critical: true
-    basic_constraints: 'CA:FALSE'
+    basic_constraints:
+      - 'CA:FALSE'
     eku:
       - codeSigning
       - msCodeInd
-    ku: digitalSignature
+    ku:
+      - digitalSignature
 
 crl_delegated:
 - full_name:
