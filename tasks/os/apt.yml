@@ -1,0 +1,8 @@
+---
+# apt related tasks
+
+- name: Install additional packages.
+  ansible.builtin.apt:
+    name:
+      - python{{ "3" if ansible_python.version.major == 3 }}-pip
+    state: latest

@@ -1,11 +1,6 @@
 ---
 #Tasks file for ansible-role-certifs
 
-- name: Install cryptography library
-  ansible.builtin.pip:
-    name: cryptography
-    state: latest
-
 - name: Include password lookup
   include_tasks:
     file: "password.yml"
@@ -16,6 +11,21 @@
 
 - ansible.builtin.set_fact:
     ansible_become_password: "{{ ansible_default.password }}"
+
+- name: Include os specific tasks.
+  ansible.builtin.include_tasks:
+    file: "os/{{ ansible_pkg_mgr }}.yml"
+  args:
+    apply:
+      become: yes
+      become_user: "{{ admin.username }}"
+  tags: internet
+
+- name: Install cryptography library
+  ansible.builtin.pip:
+    name: cryptography
+    state: latest
+
 - name: Install Own Private Key Infrastructure
   block:
   - name: Install root ca
